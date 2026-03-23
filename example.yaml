@@ -1,0 +1,26 @@
+client:
+  api_key: "_your_own_api_"
+  base_url: "_your_own_url_"
+
+github:
+  token: "_your_own_github_token_"
+  url: "https://api.github.com/search/repositories"
+  headers: 
+    accept: "application/vnd.github+json"
+    usr_agent: "github-top10-script"
+
+query:
+  stable_min_stars: 50
+  time_period: 7
+  repo_lifespan: 30
+  max_pages: 10
+  
+email:
+  smtp_host: "smtp.163.com"
+  smtp_port: 25
+  smtp_user: "_your_own_smtp_mail_address_"
+  smtp_pass: "_your_own_smtp_password_"
+  to: "_your_own_target_mail_address_"
+
+app:
+  db_path: "github_trend.db"
