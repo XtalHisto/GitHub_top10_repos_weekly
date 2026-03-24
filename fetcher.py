@@ -105,6 +105,7 @@ class Github_Fetcher:
         burst_items = self.fetch_repos_by_query(self.burst_query)
 
         repo_map = {}
+        repo_snapshot_date = datetime.now().strftime("%Y-%m-%d")
 
         for repo in stable_items + burst_items:
             repo_map[repo["id"]] = {
@@ -113,7 +114,8 @@ class Github_Fetcher:
                 "html_url": repo["html_url"],
                 "description": repo.get("description", ""),
                 "language": repo.get("language", ""),
-                "stargazers_count": repo["stargazers_count"],
+                "stars": repo["stargazers_count"],
+                "snapshot_date": repo_snapshot_date
             }
 
         result = list(repo_map.values())
