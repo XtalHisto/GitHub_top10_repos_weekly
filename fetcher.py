@@ -21,13 +21,12 @@ class Github_Fetcher:
         github_token = self.cfg.github.token
         if github_token:
             self.headers["Authorization"] = f"Bearer {github_token}"
-        self.stable = True
         
     # 产生激进和稳妥两种query
     def build_query(self):
         today = datetime.utcnow().date()
         week_ago = today - timedelta(days=self.cfg.query.time_period)
-        created_after = today - timedelta(days=self.cfg.repo_lifespan)
+        created_after = today - timedelta(days=self.cfg.query.repo_lifespan)
 
         # 稳健query
         stable_query = {
@@ -53,7 +52,7 @@ class Github_Fetcher:
             "sort": "stars",
             "order": "desc",
             "per_page": 100,
-            "page": 1,
+            "page": 10,
         }
         return stable_query, burst_query   
 
@@ -141,8 +140,4 @@ class Github_Fetcher:
     #         f.write(content)
     #     print(f"已写入 {output_file}")
 
-    def run(self):
-        items = self.fetch_github_repos()
-        content = self.build_text(items)
-        print(content)
-        self.save_to_file(content)
+    
