@@ -109,7 +109,7 @@ class Github_Fetcher:
 
         for repo in stable_items + burst_items:
             repo_map[repo["id"]] = {
-                "id": repo["id"],
+                "repo_id": repo["id"],
                 "full_name": repo["full_name"],
                 "html_url": repo["html_url"],
                 "description": repo.get("description", ""),
