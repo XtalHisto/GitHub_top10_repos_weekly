@@ -4,6 +4,15 @@ from datetime import datetime, timedelta
 
 class Github_Fetcher:
     def __init__(self ,cfg):
+        '''
+        利用fetch_candidate_repos方法生成合并的repo列表，格式如下：
+        [
+        {repo_id:id1, full_name:fullname1, html_url:url1; ...},
+        {...},
+        ...
+        ]
+        
+        '''
         self.cfg = cfg
         self.headers = {
             "Accept": self.cfg.github.headers.accept,
@@ -114,21 +123,21 @@ class Github_Fetcher:
         return result
 
     
-    def build_text(self, items):
-        lines = []
-        lines.append("GitHub 当前 Star 数前 10 项目\n")
-        for _, repo in enumerate(items, start=1):
-            lines.append(f"   {repo['full_name']}\n")
-            repo_info = self.analyser.create_text(repo)
-            lines.append(repo_info)
+    # def build_text(self, items):
+    #     lines = []
+    #     lines.append("GitHub 当前 Star 数前 10 项目\n")
+    #     for _, repo in enumerate(items, start=1):
+    #         lines.append(f"   {repo['full_name']}\n")
+    #         repo_info = self.analyser.create_text(repo)
+    #         lines.append(repo_info)
 
-        return "\n".join(lines)
+    #     return "\n".join(lines)
 
-    def save_to_file(self, content: str):
-        output_file = 'test.txt'
-        with open(output_file, "w", encoding="utf-8") as f:
-            f.write(content)
-        print(f"已写入 {output_file}")
+    # def save_to_file(self, content: str):
+    #     output_file = 'test.txt'
+    #     with open(output_file, "w", encoding="utf-8") as f:
+    #         f.write(content)
+    #     print(f"已写入 {output_file}")
 
     def run(self):
         items = self.fetch_github_repos()
