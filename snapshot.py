@@ -2,91 +2,164 @@ import sqlite3
 import requests
 from datetime import datetime, timedelta
 from omegaconf import OmegaConf
+from typing import Any
+from fetcher import Github_Fetcher
+
+
+
+
 
 class Repo_Snapshot:
-    '''
-    
-    '''
     def __init__(self, cfg):
         self.db_path = cfg.app.db_path
-        self.init_db()
+        self._init_db()
 
-    def get_conn(self):
-        return sqlite3.connect(self.db_path)
+    def _get_conn(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
 
-    def init_db(self):
-        conn = self.get_conn()
-        cursor = conn.cursor()
+    def _init_db(self) -> None:
+        conn = self._get_conn()
+        cur = conn.cursor()
 
-        cursor.execute("""
+        cur.execute("""
         CREATE TABLE IF NOT EXISTS repo_snapshots (
-            repo_id INTEGER,
-            full_name TEXT,
-            html_url TEXT,
-            description TEXT,
-            language TEXT,
-            stars INTEGER,
-            snapshot_date TEXT,
+            repo_id INTEGER NOT NULL,
+            full_name TEXT NOT NULL,
+            html_url TEXT NOT NULL,
+            description TEXT DEFAULT '',
+            language TEXT DEFAULT '',
+            stars INTEGER NOT NULL,
+            snapshot_date TEXT NOT NULL,
             PRIMARY KEY (repo_id, snapshot_date)
         )
         """)
 
+        cur.execute("""
+        CREATE INDEX IF NOT EXISTS idx_snapshot_date
+        ON repo_snapshots(snapshot_date)
+        """)
+
+        cur.execute("""
+        CREATE INDEX IF NOT EXISTS idx_repo_id
+        ON repo_snapshots(repo_id)
+        """)
+
         conn.commit()
         conn.close()
 
-    def save_snapshot(self, repos, snapshot_date):
-        conn = self.get_conn()
-        cursor = conn.cursor()
+    def save_snapshot(self, repos: list[dict[str, Any]]) -> None:
+        """
+        批量保存某一次抓取的仓库快照。
+        要求 repos 中每个 dict 都包含：
+        repo_id, full_name, html_url, description, language, stars, snapshot_date
+        """
+        if not repos:
+            return
 
+        conn = self._get_conn()
+        cur = conn.cursor()
+
+        rows = []
+
+        # 将fetcher中抓取到的仓库list转化成sqlite3插入格式
         for repo in repos:
-            cursor.execute("""
-            INSERT OR REPLACE INTO repo_snapshots
-            (repo_id, full_name, html_url, description, language, stars, snapshot_date)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (
-                repo["id"],
+            rows.append((
+                repo["repo_id"],
                 repo["full_name"],
                 repo["html_url"],
                 repo.get("description", ""),
                 repo.get("language", ""),
-                repo["stargazers_count"],
-                snapshot_date
+                repo["stars"],
+                repo["snapshot_date"],
             ))
+
+        # insert or replace保证没有重复数据
+        cur.executemany("""
+        INSERT OR REPLACE INTO repo_snapshots
+        (repo_id, full_name, html_url, description, language, stars, snapshot_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, rows)
 
         conn.commit()
         conn.close()
 
-    def get_latest_snapshot_date(self):
-        conn = self.get_conn()
-        cursor = conn.cursor()
+    # 保存快照日期，使用仓库中元素snapshot_date中的最大值
+    def get_all_snapshot_dates(self) -> list[str]:
+        conn = self._get_conn()
+        cur = conn.cursor()
 
-        cursor.execute("""
-        SELECT MAX(snapshot_date) FROM repo_snapshots
+        cur.execute("""
+        SELECT DISTINCT snapshot_date
+        FROM repo_snapshots
+        ORDER BY snapshot_date DESC
         """)
-        row = cursor.fetchone()
 
+        dates = [row["snapshot_date"] for row in cur.fetchall()]
         conn.close()
-        return row[0] if row and row[0] else None
+        return dates
 
-    def get_previous_snapshot_date(self, current_date):
-        conn = self.get_conn()
-        cursor = conn.cursor()
+    # 找最新快照日期
+    def get_latest_snapshot_date(self) -> str | None:
+        conn = self._get_conn()
+        cur = conn.cursor()
 
-        cursor.execute("""
-        SELECT MAX(snapshot_date)
+        cur.execute("""
+        SELECT MAX(snapshot_date) AS snapshot_date
+        FROM repo_snapshots
+        """)
+
+        row = cur.fetchone()
+        conn.close()
+        return row["snapshot_date"] if row and row["snapshot_date"] else None
+
+    # 找上一次快照时间
+    def get_previous_snapshot_date(self, current_date: str) -> str | None:
+        conn = self._get_conn()
+        cur = conn.cursor()
+
+        cur.execute("""
+        SELECT MAX(snapshot_date) AS snapshot_date
         FROM repo_snapshots
         WHERE snapshot_date < ?
         """, (current_date,))
-        row = cursor.fetchone()
 
+        row = cur.fetchone()
         conn.close()
-        return row[0] if row and row[0] else None
+        return row["snapshot_date"] if row and row["snapshot_date"] else None
 
-    def get_top_growth_repos(self, current_date, previous_date, top_n=10):
-        conn = self.get_conn()
-        cursor = conn.cursor()
+    # 找某一天的快照
+    def get_repos_by_snapshot_date(self, snapshot_date: str) -> list[dict[str, Any]]:
+        conn = self._get_conn()
+        cur = conn.cursor()
 
-        cursor.execute("""
+        cur.execute("""
+        SELECT repo_id, full_name, html_url, description, language, stars, snapshot_date
+        FROM repo_snapshots
+        WHERE snapshot_date = ?
+        ORDER BY stars DESC, full_name ASC
+        """, (snapshot_date,))
+
+        rows = cur.fetchall()
+        conn.close()
+
+        return [dict(row) for row in rows]
+
+    # 计算差值
+    def get_top_growth_repos(
+        self,
+        current_date: str,
+        previous_date: str,
+        top_n: int = 10
+    ) -> list[dict[str, Any]]:
+        """
+        对比两个快照日期，计算 stars 增长 Top N
+        """
+        conn = self._get_conn()
+        cur = conn.cursor()
+
+        cur.execute("""
         SELECT
             c.repo_id,
             c.full_name,
@@ -95,83 +168,60 @@ class Repo_Snapshot:
             c.language,
             c.stars AS current_stars,
             p.stars AS previous_stars,
-            (c.stars - p.stars) AS weekly_growth
+            (c.stars - p.stars) AS weekly_growth,
+            c.snapshot_date AS current_snapshot_date,
+            p.snapshot_date AS previous_snapshot_date
         FROM repo_snapshots c
         JOIN repo_snapshots p
-            ON c.repo_id = p.repo_id
+          ON c.repo_id = p.repo_id
         WHERE c.snapshot_date = ?
           AND p.snapshot_date = ?
         ORDER BY weekly_growth DESC, current_stars DESC
         LIMIT ?
         """, (current_date, previous_date, top_n))
 
-        rows = cursor.fetchall()
+        rows = cur.fetchall()
         conn.close()
 
         results = []
         for row in rows:
             results.append({
-                "repo_id": row[0],
-                "full_name": row[1],
-                "html_url": row[2],
-                "description": row[3],
-                "language": row[4],
-                "stargazers_count": row[5],
-                "previous_stars": row[6],
-                "weekly_stars": row[7]
+                "repo_id": row["repo_id"],
+                "full_name": row["full_name"],
+                "html_url": row["html_url"],
+                "description": row["description"],
+                "language": row["language"],
+                "stars": row["current_stars"],
+                "previous_stars": row["previous_stars"],
+                "weekly_stars": row["weekly_growth"],
+                "current_snapshot_date": row["current_snapshot_date"],
+                "previous_snapshot_date": row["previous_snapshot_date"],
             })
 
         return results
-    def fetch_and_save_snapshot(self, response):
-        response.raise_for_status()
 
-        data = response.json()
-        items = data.get("items", [])
+    def debug_print_all(self) -> None:
+        conn = self._get_conn()
+        cur = conn.cursor()
 
-        repos = []
-        for repo in items:
-            repos.append({
-                "id": repo["id"],
-                "full_name": repo["full_name"],
-                "html_url": repo["html_url"],
-                "description": repo.get("description", ""),
-                "language": repo.get("language", ""),
-                "stargazers_count": repo["stargazers_count"]
-            })
+        cur.execute("""
+        SELECT repo_id, full_name, html_url, description, language, stars, snapshot_date
+        FROM repo_snapshots
+        ORDER BY snapshot_date DESC, stars DESC
+        """)
 
-        repos = sorted(repos, key=lambda x: x["stargazers_count"], reverse=True)
+        rows = cur.fetchall()
+        conn.close()
 
-        snapshot_date = datetime.now().strftime("%Y-%m-%d")
-        self.store.save_snapshot(repos, snapshot_date)
-
-        print(f"snapshot saved: {snapshot_date}, count={len(repos)}")
-        return repos
+        for row in rows:
+            print(dict(row))
 
 
-# # def mock_repos(stars_offset=0):
-#     """
-#     构造假的 GitHub 数据
-#     """
-#     return [
-#         {
-#             "id": 1,
-#             "full_name": "test/repo1",
-#             "html_url": "https://github.com/test/repo1",
-#             "description": "repo1 desc",
-#             "language": "Python",
-#             "stargazers_count": 100 + stars_offset
-#         },
-#         {
-#             "id": 2,
-#             "full_name": "test/repo2",
-#             "html_url": "https://github.com/test/repo2",
-#             "description": "repo2 desc",
-#             "language": "Go",
-#             "stargazers_count": 200 + stars_offset
-#         }
-#     ]
+if __name__ == '__main__':
 
-
-
-if __name__ == "__main__":
-    cfg = OmegaConf.load('config.yaml')
+    cfg = OmegaConf.load("config.yaml")
+    fetcher = Github_Fetcher(cfg)
+    snapshoter = Repo_Snapshot(cfg)
+    repos = fetcher.fetch_candidate_repos()
+    snapshoter.save_snapshot(repos)
+    snapshoter.debug_print_all()
