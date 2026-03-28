@@ -6,9 +6,6 @@ from typing import Any
 from fetcher import Github_Fetcher
 
 
-
-
-
 class Repo_Snapshot:
     def __init__(self, cfg):
         self.db_path = cfg.app.db_path
