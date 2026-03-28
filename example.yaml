@@ -20,7 +20,10 @@ email:
   smtp_port: 25
   smtp_user: "_your_own_smtp_mail_address_"
   smtp_pass: "_your_own_smtp_password_"
-  to: "_your_own_target_mail_address_"
+
+recipient:
+  name: "_your_recipient_name_"
+  email_address: "_your_own_target_mail_address_"
 
 app:
   db_path: "github_trend.db"
