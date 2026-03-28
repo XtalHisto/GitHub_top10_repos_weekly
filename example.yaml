@@ -25,5 +25,12 @@ recipient:
   name: "_your_recipient_name_"
   email_address: "_your_own_target_mail_address_"
 
+contributor:
+  name: "_your_name_"
+  github_address: "https://github.com/XtalHisto"
+  project_repo: "https://github.com/XtalHisto/GitHub_top10_repos_weekly"
+  data_source: "https://docs.github.com/en/rest"
+ 
+
 app:
   db_path: "github_trend.db"
