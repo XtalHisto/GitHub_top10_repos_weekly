@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+__init__.py
 
 # Virtual env
 .venv/
@@ -20,7 +21,6 @@ config.yaml
 # Database / outputs
 *.db
 *.sqlite3
-test.txt
 *.html
 
 # OS files
