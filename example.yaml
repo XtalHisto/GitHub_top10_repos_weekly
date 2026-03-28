@@ -31,6 +31,8 @@ contributor:
   project_repo: "https://github.com/XtalHisto/GitHub_top10_repos_weekly"
   data_source: "https://docs.github.com/en/rest"
  
-
+img:
+  path: 'logo.png'
+  
 app:
   db_path: "github_trend.db"
