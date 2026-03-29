@@ -127,7 +127,7 @@ class GitHubWeeklyEmailBuilder:
                 GitHub 周报系统
             </p>
 
-        <div style="margin-top:40px;padding-top:20px;border-top:1px solid #e5e5e5;text-align:center;color:#666;font-size:14px;">
+        <div style="margin-top:20px;padding-top:60px;border-top:1px solid #e5e5e5;text-align:center;color:#666;font-size:14px;">
             
 
         <div style="margin-top: 30px; text-align: center;">
