@@ -19,12 +19,16 @@ email:
   smtp_host: "smtp.163.com"
   smtp_port: 25
   smtp_user: "_your_own_smtp_mail_address_"
-  smtp_pass: "_your_own_smtp_password_"
+  smtp_pswd: "_your_own_smtp_password_"
+  smtp_nickname: "_nickname_of_your_sender_"
 
 recipient:
-  name: "_your_recipient_name_"
-  email_address: "_your_own_target_mail_address_"
-
+  recipient_1:
+    name: "_your_recipient_name_"
+    email_address: "_your_own_target_mail_address_"
+  recipient_2:
+    name: "_your_recipient_name_"
+    email_address: "_your_reciever_target_mail_address_"
 contributor:
   name: "_your_name_"
   github_address: "https://github.com/XtalHisto"
@@ -32,7 +36,8 @@ contributor:
   data_source: "https://docs.github.com/en/rest"
  
 img:
-  path: 'logo.png'
+  path: "logo.png"
+  cid: "github_logo"
   
 app:
   db_path: "github_trend.db"
