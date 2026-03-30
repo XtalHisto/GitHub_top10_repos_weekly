@@ -35,7 +35,7 @@ class Emailer:
         return msg
 
 
-    def email_send(self, html):
+    def email_send(self, html, recipient_adrs):
         # 创建邮件对象
         self.msg = self.img_attacher(html)
         with open("test.html", "w", encoding="utf-8") as f:
@@ -45,7 +45,7 @@ class Emailer:
         self.msg["From"] = formataddr((str(Header(self.smtp['nickname'], "utf-8")), self.smtp['user']))
 
         # 收件人列表
-        to_list = [r["adrs"] for r in self.reciever]
+        to_list = recipient_adrs
 
         # 收件人显示
         to_header = ",".join([
@@ -72,10 +72,10 @@ class Emailer:
             # 关闭连接
             smtp_connection.quit()
 
-            print("邮件发送成功！")
+            print(f"给 {recipient_adrs} 成功发送邮件！")
 
         except Exception as e:
-            print("邮件发送失败：", e)
+            print(f"给 {recipient_adrs} 发送邮件失败！")
     
 
     def email_send_file(self, html_file):
