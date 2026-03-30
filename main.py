@@ -28,5 +28,5 @@ for people in cfg.recipient:
     html_content = builder.build_html(diff['results'], people['name'] ) 
     with open(f"{people['name']}_test.html", "w", encoding="utf-8") as f:
         f.write(html_content)
-    emailer.email_send(html_content)
+    emailer.email_send(html_content, people['email_address'])
 # emailer.email_send_file('test.html')
