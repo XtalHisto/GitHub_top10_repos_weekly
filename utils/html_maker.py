@@ -5,20 +5,19 @@ from omegaconf import OmegaConf
 class Email_Builder:
     def __init__(self, cfg):
         self.cfg = cfg
-        self.recipient_name = self.cfg.recipient.name
         
 
     def build_header(self) -> str:
         return f"""
-        <div style="padding: 24px 0 20px 0; border-bottom: 1px solid #e5e5e5;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <img src="cid:{self.cfg.img.cid}" style="height: 42px; width: auto; display: block;">
-            <div style="font-size: 48px; color: #999; font-weight: 300; line-height: 1;">
-                本周周报
+        <div style="padding: 24px 0 16px 0; border-bottom: 1px solid #e5e5e5;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <img src="cid:{self.cfg.img.cid}" style="height: 28px; width: auto; display: block;">
+                <div style="font-size: 36px; color: #888;">本周周报</div>
+                </div>
             </div>
         </div>
-    </div>
         """.strip()
+    
     
     # 时间区间
     def build_report_period(self, repos: list[dict]) -> str:
@@ -45,8 +44,13 @@ class Email_Builder:
 
 
 
-    def build_greeting(self) -> str:
-        return f"<p style='margin: 24px 0 0 0;'>{self.recipient_name}，你好：</p>"
+    def build_greeting(self, recipient_name=None, group_mode=False) -> str:
+        if group_mode:
+            return "<p style='margin: 24px 0 0 0;'>各位好：</p>"
+        if recipient_name:
+            return f"<p style='margin: 24px 0 0 0;'>{recipient_name}，你好：</p>"
+        return "<p style='margin: 24px 0 0 0;'>您好：</p>"
+
 
     def build_intro(self) -> str:
         return """
@@ -151,14 +155,14 @@ class Email_Builder:
         """.strip()
 
 
-    def build_html(self, repos: list[dict]) -> str:
+    def build_html(self, repos: list[dict], recipient_name=None, group_mode=False) -> str:
         repo_section = self.build_repo_section(repos)
         date = self.build_report_period(repos)
         return f"""
         <html>
         <body style="font-family: Arial, sans-serif; line-height: 1.8; color: #333; max-width: 760px; margin: 0 auto; padding: 20px;">
             {self.build_header()}
-            {self.build_greeting()}
+            {self.build_greeting(recipient_name=recipient_name, group_mode=group_mode)}
             {self.build_intro()}
             {self.build_notice()}
             <p><b>统计时间：</b>{self.start_date} 至 {self.end_date}</p>
