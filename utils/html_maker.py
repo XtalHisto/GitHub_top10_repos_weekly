@@ -12,7 +12,7 @@ class Email_Builder:
         return f"""
         <div style="padding: 24px 0 20px 0; border-bottom: 1px solid #e5e5e5;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <img src={self.cfg.img.path} style="height: 42px; width: auto; display: block;">
+            <img src="cid:{self.cfg.img.cid}" style="height: 42px; width: auto; display: block;">
             <div style="font-size: 48px; color: #999; font-weight: 300; line-height: 1;">
                 本周周报
             </div>
@@ -131,7 +131,7 @@ class Email_Builder:
             
 
         <div style="margin-top: 30px; text-align: center;">
-            <img src={self.cfg.img.path} style="height:20px; opacity:0.8;margin-bottom: 16px;">
+            <img src="cid:{self.cfg.img.cid}" style="height:20px; opacity:0.8;margin-bottom: 16px;">
         </div>
 
         
