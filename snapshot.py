@@ -196,6 +196,22 @@ class Repo_Snapshot:
             })
 
         return results
+    
+    # 查找某一天的快照内有多少条仓库数据记录
+    def count_repos_by_snapshot_date(self, snapshot_date: str) -> int:
+        conn = self._get_conn()
+        cur = conn.cursor()
+
+        cur.execute("""
+        SELECT COUNT(*) AS cnt
+        FROM repo_snapshots
+        WHERE snapshot_date = ?
+        """, (snapshot_date,))
+
+        row = cur.fetchone()
+        conn.close()
+        return row["cnt"]
+
 
     def debug_print_all(self) -> None:
         conn = self._get_conn()
