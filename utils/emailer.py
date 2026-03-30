@@ -38,6 +38,8 @@ class Emailer:
     def email_send(self, html):
         # 创建邮件对象
         self.msg = self.img_attacher(html)
+        with open("test.html", "w", encoding="utf-8") as f:
+            f.write(html)
 
         # 发件人显示名
         self.msg["From"] = formataddr((str(Header(self.smtp['nickname'], "utf-8")), self.smtp['user']))
