@@ -29,6 +29,7 @@ recipient:
   recipient_2:
     name: "_your_recipient_name_"
     email_address: "_your_reciever_target_mail_address_"
+    
 contributor:
   name: "_your_name_"
   github_address: "https://github.com/XtalHisto"
