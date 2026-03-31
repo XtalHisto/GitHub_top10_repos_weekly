@@ -25,7 +25,7 @@ class Client_Analysis:
         self.agent =  OpenAI(api_key = cfg.client.api_key, base_url = cfg.client.base_url) 
         self.thinking = False
     
-    def create_prompt(self, repo):
+    def create_prompt(self, repo, time_delta):
         name = repo["full_name"]
         desc = repo.get("description", "")
         stars = repo.get("stars", 0)
@@ -33,30 +33,28 @@ class Client_Analysis:
         url = repo.get("html_url", "")
         language = repo.get('language','')
         prompt = f"""
-你是一个技术分析助手，请分析下面这个 GitHub 项目，并用中文输出简洁总结：
+            你是一个技术分析助手，请分析下面这个 GitHub 项目，并用中文输出简洁总结：
 
-【项目信息】
-名称：{name}
-描述：{desc}
-Star数： {stars}
-链接：{url}
-语言：{language} 
-上周star数增加量： {weekly_stars}
+            【项目信息】
+            名称：{name}
+            描述：{desc}
+            Star数： {stars}
+            链接：{url}
+            语言：{language} 
+            {time_delta['weeks']}周{time_delta["days"]}天内star数增加量： {weekly_stars}
 
-【要求】
-1. 用 2~3 句话说明这个项目是做什么的
-2. 说明它为什么本周会开始受欢迎（上周star数增加量）
-3. 最后一句：适合谁使用
-
-
-"""
+            【要求】
+            1. 用 2~3 句话说明这个项目是做什么的
+            2. 说明它为什么在{time_delta['weeks']}周{time_delta["days"]}天内会开始受欢迎（{time_delta['weeks']}周{time_delta["days"]}天内star数增加量）
+            3. 最后一句：适合谁使用
+        """
         return prompt.strip()
 
-    def get_response(self,repo):
-        prompt = self.create_prompt(repo)
+    def get_response(self,results,time_delta):
+        prompt = self.create_prompt(results, time_delta)
 
         response = self.agent.chat.completions.create(
-            model="qwen3-vl-235b-a22b-thinking",
+            model=self.cfg.client.model[0].name,
             messages=[
                 {
                     "role": "user",
