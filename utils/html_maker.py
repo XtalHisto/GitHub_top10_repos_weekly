@@ -12,7 +12,7 @@ class Email_Builder:
         <div style="padding: 24px 0 16px 0; border-bottom: 1px solid #e5e5e5;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <img src="cid:{self.cfg.img.cid}" style="height: 28px; width: auto; display: block;">
-                <div style="font-size: 36px; color: #888;">本周周报</div>
+                <div style="font-size: 36px; color: #888;">今日简报</div>
                 </div>
             </div>
         </div>
@@ -55,7 +55,7 @@ class Email_Builder:
     def build_intro(self) -> str:
         return """
         <p>
-            以下是本周GitHub热门项目周报。该报告基于最近一周内项目的star增长情况整理，
+            以下是这段时间内GitHub热门项目简报。该报告基于最近一段时间内项目的star增长情况整理，
             并结合项目描述生成简要总结，方便你快速了解近期值得关注的开源项目。
         </p>
         """.strip()
@@ -63,7 +63,7 @@ class Email_Builder:
     def build_notice(self) -> str:
         return """
         <p>
-            本邮件中的项目榜单按“最近7天star增量”排序，仅用于技术信息参考。
+            本邮件中的项目榜单按“star增量”排序，仅用于技术信息参考。
             若你正在跟踪AI、开发工具、自动化、数据工程或开源基础设施方向，可以重点关注这些项目。
         </p>
         """.strip()
@@ -124,11 +124,10 @@ class Email_Builder:
         return f"""
             <p style="margin-top: 24px;">
             此致<br>
-            敬礼
             </p>
 
             <p style="margin-top: 8px;">
-                GitHub 周报系统
+                GitHub 简报系统
             </p>
 
         <div style="margin-top:20px;padding-top:60px;border-top:1px solid #e5e5e5;text-align:center;color:#666;font-size:14px;">
