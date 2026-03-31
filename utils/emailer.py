@@ -55,7 +55,7 @@ class Emailer:
         self.msg["To"] = to_header
 
         # 主题
-        self.msg["Subject"] = Header("GitHub star数增长情况周报", "utf-8")
+        self.msg["Subject"] = Header("GitHub star数增长情况简报", "utf-8")
 
         try:
             # 连接邮件服务器并登录
