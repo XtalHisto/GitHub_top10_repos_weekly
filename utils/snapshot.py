@@ -256,6 +256,20 @@ class Repo_Snapshot:
 
         return results
     
+    def diff_in_weeks_days(self,t1, t2) -> dict:
+        format = "%Y-%m-%d"
+        t1 = datetime.strptime(t1, format)
+        t2 = datetime.strptime(t2, format)
+        delta = abs(t2 - t1)
+        days = delta.days
+        weeks = days // 7
+        remain_days = days % 7
+        time_delta = {}
+        time_delta['days'] = remain_days
+        time_delta['weeks'] = weeks
+        return time_delta
+
+    
     def get_top_growth_repos_safe(self, current_date, previous_date, top_n: int = 10,
             min_common_ratio: float = 0.7, min_common_count: int = 1,) -> dict[str, Any]:
         """
@@ -352,12 +366,15 @@ class Repo_Snapshot:
             previous_date=previous_date,
             top_n=top_n,
         )
+        time_delta = self.diff_in_weeks_days(current_date, previous_date)
+
 
         return {
             "ok": True,
             "message": "查询成功",
             "stats": stats,
             "results": results,
+            "time_delta": time_delta
         }
 
 
