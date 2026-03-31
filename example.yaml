@@ -1,6 +1,9 @@
 client:
   api_key: "_your_own_api_"
   base_url: "_your_own_url_"
+  model: 
+    - name: "qwen3-max-2026-01-23"
+    - name: "qwen3-vl-235b-a22b-thinking"
 
 github:
   token: "_your_own_github_token_"
