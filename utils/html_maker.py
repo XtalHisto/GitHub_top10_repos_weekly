@@ -105,7 +105,7 @@ class Email_Builder:
                 <h3 style="margin: 0 0 10px 0;">#{idx} {name}</h3>
                 <p style="margin: 4px 0;"><b>项目链接：</b><a href="{url}">{url}</a></p>
                 <p style="margin: 4px 0;"><b>当前star：</b>{stars}</p>
-                <p style="margin: 4px 0;"><b>本周新增star：</b>{weekly_stars}</p>
+                <p style="margin: 4px 0;"><b>新增star：</b>{weekly_stars}</p>
                 <p style="margin: 4px 0;"><b>项目描述：</b>{description}</p>
                 <p style="margin: 8px 0 0 0;"><b>项目总结：</b>{summary}</p>
             </div>
