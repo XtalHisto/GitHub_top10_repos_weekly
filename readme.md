@@ -10,6 +10,7 @@
 - [ ] Generate weekly growth ranking from snapshot diffs
 - [ ] Export final report to HTML
 - [ ] Automate weekly scheduled execution
+- [ ] https://blog.csdn.net/ytusdc/article/details/132403852?utm_source=chatgpt.com
 
 ## Notes
 
